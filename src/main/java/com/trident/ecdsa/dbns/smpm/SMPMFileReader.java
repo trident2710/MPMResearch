@@ -9,8 +9,8 @@ import com.trident.crypto.elliptic.EllipticCurvePoint;
 import com.trident.crypto.field.element.FiniteFieldElementFactory;
 import com.trident.crypto.util.Tuple;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
 import java.math.BigInteger;
 import java.util.Map;
 import java.util.TreeMap;
@@ -20,43 +20,22 @@ import java.util.TreeMap;
  * from file storage
  * @author trident
  */
-public class SMPMFileLoader implements SMPMContainer{
+public class SMPMFileReader extends Reader{
     
-    private Map<BigInteger,Map<BigInteger,EllipticCurvePoint>> values;
-    private final File container;
-    private int omega = -1;
-    private Tuple<EllipticCurvePoint,EllipticCurvePoint> declaredPoints;
+    private final Reader reader;
     
-    public SMPMFileLoader(String filePath){
-        this.container = new File(filePath);
-        if(!container.isFile()) 
-            throw new RuntimeException("unable to read");
+    public SMPMFileReader(Reader reader){
+        this.reader = reader;
     }
-    
-    @Override
-    public EllipticCurvePoint get(BigInteger i, BigInteger j) {
-        if(values==null)
-            loadValues();
-        return values.get(i).get(j);     
-    }
-    
-    @Override
-    public int getOmega() {
-        if(omega<0)
-            loadValues();
-        return omega;
-    }
-
-    @Override
-    public Tuple<EllipticCurvePoint, EllipticCurvePoint> getPoints() {
-        if(declaredPoints ==null)
-            loadValues();
-        return declaredPoints;
-    }
-    
-    private void loadValues(){
+        
+    public SMPMContainer readPoints() throws IOException{
+        
+        Map<BigInteger,Map<BigInteger,EllipticCurvePoint>> values = new TreeMap<>();
+        int omega = -1;
+        Tuple<EllipticCurvePoint,EllipticCurvePoint> declaredPoints;
+        
         FiniteFieldElementFactory factory = new FiniteFieldElementFactory();
-        try(BufferedReader r = new BufferedReader(new FileReader(container))) {
+        try(BufferedReader r = new BufferedReader(reader)) {
             
             String s = r.readLine();
             if(s ==null) throw new RuntimeException("unable to read");
@@ -70,7 +49,6 @@ public class SMPMFileLoader implements SMPMContainer{
                     EllipticCurvePoint.create(factory.createFrom(new BigInteger(pTokens[0])), factory.createFrom(new BigInteger(pTokens[1]))),
                     EllipticCurvePoint.create(factory.createFrom(new BigInteger(pTokens[2])), factory.createFrom(new BigInteger(pTokens[3]))));
             
-            values = new TreeMap<>();
             s = r.readLine();
             while (s!=null) {                
                 String[] tokens = s.split(" ");
@@ -90,8 +68,17 @@ public class SMPMFileLoader implements SMPMContainer{
                 s = r.readLine();
             }
             r.close();   
-        } catch (Exception ex) {
-            throw new RuntimeException("unable to read");
         } 
+        return new SMPMContainerImpl(values, declaredPoints, omega);
     }  
+
+    @Override
+    public int read(char[] cbuf, int off, int len) throws IOException {
+        return reader.read(cbuf, off, len);
+    }
+
+    @Override
+    public void close() throws IOException {
+        reader.close();
+    }
 }

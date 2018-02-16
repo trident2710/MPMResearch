@@ -8,6 +8,7 @@ package com.trident.ecdsa.dbns.smpm;
 import com.trident.crypto.elliptic.EllipticCurvePoint;
 import com.trident.crypto.util.Tuple;
 import java.math.BigInteger;
+import java.util.Map;
 
 /**
  * container of pre-calculated points for SMPM
@@ -22,6 +23,12 @@ public interface SMPMContainer {
      * @return Z = iP + jQ
      */
     EllipticCurvePoint get(BigInteger i, BigInteger j);
+    
+    /**
+     * get all pre-calculated iP+ jQ points where P and Q are the elliptic curve points for which this pre-calculation was done
+     * @return Z = iP + jQ for i,j : [0,2^omega-1]
+     */
+    Map<BigInteger,Map<BigInteger,EllipticCurvePoint>> getAll();
     
     /**
      * following to algorithm it is needed to calculate iP + jQ for all i,j : [0, 2^omega - 1]
