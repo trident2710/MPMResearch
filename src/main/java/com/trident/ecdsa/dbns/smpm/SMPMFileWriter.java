@@ -23,7 +23,7 @@ public class SMPMFileWriter extends Writer{
         this.writer = writer;
     }
     
-    public void write(SMPMContainer container){
+    public void write(SMPMContainer container) throws IOException{
         try (BufferedWriter w = new BufferedWriter(writer)){
             String omegaString = ""+container.getOmega();
             w.write(omegaString);
@@ -31,10 +31,9 @@ public class SMPMFileWriter extends Writer{
             StringBuilder pointsString = new StringBuilder();
             Tuple<EllipticCurvePoint,EllipticCurvePoint> points = container.getPoints();
             pointsString
-                    .append(points.getK().getPointX().toString(10)).append(" ")
-                    .append(points.getK().getPointY().toString(10)).append(" ")
-                    .append(points.getV().getPointX().toString(10)).append(" ")
-                    .append(points.getV().getPointY().toString(10)).append(" ");
+                    .append(points.getK().toString(16)).append(":")
+                    .append(points.getV().toString(16));
+            
             w.write(pointsString.toString());
             w.newLine();
             
@@ -42,10 +41,8 @@ public class SMPMFileWriter extends Writer{
                 set.forEach((j,point)->{
                     StringBuilder line = new StringBuilder();
                     line
-                            .append(i.toString(10)).append(" ")
-                            .append(j.toString(10)).append(" ")
-                            .append(point.getPointX().toString(10)).append(" ")
-                            .append(point.getPointY().toString(10)).append(" ");
+                            .append(i.toString(10)).append(";").append(j.toString(10)).append(":")
+                            .append(point.toString(16));
                     
                     try {
                         w.write(line.toString());
@@ -55,9 +52,7 @@ public class SMPMFileWriter extends Writer{
                     }
                 });
             });   
-        } catch (Exception e) {
-            throw new RuntimeException("unable to write");
-        }
+        } 
     }
     
     @Override

@@ -43,10 +43,13 @@ public class SMPMPointCalculator {
         values = new TreeMap<>();
         BigInteger size = BigInteger.ONE.shiftLeft(omega); // 2^omega
         
-        for(BigInteger i = BigInteger.ZERO; i.compareTo(size)<0; i.add(BigInteger.ONE)){
+        for(BigInteger i = BigInteger.ZERO; i.compareTo(size)<0; i = i.add(BigInteger.ONE)){
             values.put(i, new TreeMap<>());
-            for(BigInteger j = BigInteger.ZERO; j.compareTo(size)<0; j.add(BigInteger.ONE)){
-                values.get(i).put(j, operator.add(operator.mul(i, P), operator.mul(j, Q)));
+            for(BigInteger j = BigInteger.ZERO; j.compareTo(size)<0; j = j.add(BigInteger.ONE)){
+                System.out.println("calculate point: "+i+" "+j);
+                EllipticCurvePoint L = i.equals(BigInteger.ZERO)?EllipticCurvePoint.POINT_ON_INFINITY:operator.mul(i, P);
+                EllipticCurvePoint R = j.equals(BigInteger.ZERO)?EllipticCurvePoint.POINT_ON_INFINITY:operator.mul(j, Q);
+                values.get(i).put(j, operator.add(L,R));
             }
         }
     }

@@ -43,24 +43,38 @@ public class SMPMFileReader extends Reader{
             
             s = r.readLine();
             if(s ==null) throw new RuntimeException("unable to read");
-            String[] pTokens = s.split(" ");
-            if(pTokens.length!=4) throw new RuntimeException("wrong line");
+            String[] pTokens = s.split(":");
+            if(pTokens.length!=2) throw new RuntimeException("wrong line");
+            String[] PT = pTokens[0].split(";");
+            if(PT.length!=2) throw new RuntimeException("wrong line");
+            String[] QT = pTokens[1].split(";");
+            if(QT.length!=2) throw new RuntimeException("wrong line");
+                
             declaredPoints = new Tuple<>(
-                    EllipticCurvePoint.create(factory.createFrom(new BigInteger(pTokens[0])), factory.createFrom(new BigInteger(pTokens[1]))),
-                    EllipticCurvePoint.create(factory.createFrom(new BigInteger(pTokens[2])), factory.createFrom(new BigInteger(pTokens[3]))));
+                    EllipticCurvePoint.create(factory.createFrom(new BigInteger(PT[0],16)), factory.createFrom(new BigInteger(PT[1],16))),
+                    EllipticCurvePoint.create(factory.createFrom(new BigInteger(QT[0],16)), factory.createFrom(new BigInteger(QT[1],16))));
             
             s = r.readLine();
             while (s!=null) {                
-                String[] tokens = s.split(" ");
-                if(tokens.length!=4) throw new RuntimeException("wrong line");
+                String[] tokens = s.split(":");
+                if(tokens.length!=2) throw new RuntimeException("wrong line");
+                String[] ijt = tokens[0].split(";");
+                if(ijt.length!=2) throw new RuntimeException("wrong line");
                 
-                BigInteger i = new BigInteger(tokens[0]);
-                BigInteger j = new BigInteger(tokens[1]);
-                BigInteger px = new BigInteger(tokens[2]);
-                BigInteger py = new BigInteger(tokens[3]);
+                BigInteger i = new BigInteger(ijt[0]);
+                BigInteger j = new BigInteger(ijt[1]);
                 
-                EllipticCurvePoint p = EllipticCurvePoint.create(factory.createFrom(px), factory.createFrom(py));
-                
+                EllipticCurvePoint p = null;
+                if(tokens[1].equals(EllipticCurvePoint.POINT_ON_INFINITY.toString())){
+                    p = EllipticCurvePoint.POINT_ON_INFINITY;
+                } else{
+                    String[] pt = tokens[1].split(";");
+                    if(pt.length!=2) throw new RuntimeException("wrong line");
+                    BigInteger px = new BigInteger(pt[0],16);
+                    BigInteger py = new BigInteger(pt[1],16);
+                    p = EllipticCurvePoint.create(factory.createFrom(px), factory.createFrom(py));
+                }
+
                 if(!values.containsKey(i)){
                     values.put(i, new TreeMap<>());
                 }

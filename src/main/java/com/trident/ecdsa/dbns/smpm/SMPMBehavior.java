@@ -56,7 +56,7 @@ public class SMPMBehavior implements MPMBehavior{
         R = EllipticCurvePoint.POINT_ON_INFINITY;
         
         for(int i=d-1; i>=0; i--){
-            R = operator.mul(BigInteger.valueOf(2).shiftLeft(omega), R);
+            R = operator.mul(BigInteger.valueOf(2).pow(omega), R);
             EllipticCurvePoint precal = container.get(K.get(i), L.get(i));
             if(precal ==null) throw new RuntimeException("precalculated value does not exist in the container");
             R = operator.add(R, precal);
@@ -75,7 +75,7 @@ public class SMPMBehavior implements MPMBehavior{
             for(int j=0;j<blockSize;j++){
                 if(blockSize*i+j<val.bitLength())
                     if(val.testBit(blockSize*i+j))
-                        v.add(BigInteger.ONE.shiftLeft(j)); // v+= 2^j
+                        v = v.add(BigInteger.ONE.shiftLeft(j)); // v+= 2^j
             }
             res.add(v);
         }

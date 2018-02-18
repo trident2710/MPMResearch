@@ -28,7 +28,7 @@ public class SMPMContainerImpl implements SMPMContainer{
     
     @Override
     public EllipticCurvePoint get(BigInteger i, BigInteger j) {
-        return values.get(i).get(i);
+        return values.get(i)!=null?values.get(i).get(j):null;
     }
 
     @Override
